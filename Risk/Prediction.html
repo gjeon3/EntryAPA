@@ -1,0 +1,108 @@
+{% extends "global/Page.html" %}
+
+
+{% block title %}
+    Part 2: Gamble Prediction
+{% endblock %}
+{% block content %}
+
+
+    <h4>Instructions</h4>
+    <p>
+        Instructions. Blah Blah
+
+    </p>
+
+<div class="panel panel-default container" >
+
+    <div class="text-center">
+<h3>Please select your prediction</h3>
+    </div>
+
+    <div class="panel-body">
+<div class="form-group required">
+    <table class='table table-bordered text-center' style='width: auto; margin: auto'>
+        <tr>
+            <th colspan = 6 class="text-center">GAMBLE PREDICTION SHEET</th>
+        </tr>
+        <tr>
+            <th>Gamble</th>
+            <th>Event</th>
+            <th>Payoff</th>
+            <th>Probabilities</th>
+            <th>Your Selection</th>
+        </tr>
+        <tr>
+            <th rowspan=2 class="text-center">1</th>
+            <td>A</td>
+            <td>16 ECU</td>
+            <td>50%</td>
+            <td rowspan=2><label>
+                    <input type="radio" name="gamble" value="1" style="vertical-align:bottom">
+                </label>
+            </td>
+        </tr>
+        <tr>
+            <td>B</td>
+            <td>16 ECU</td>
+            <td>50%</td>
+        </tr>
+        <tr>
+            <th rowspan=2 class="text-center"><b>2</b></th>
+            <td>A</td>
+            <td>24 ECU</td>
+            <td>50%</td>
+            <td rowspan=2><label><input type="radio" name="gamble" value="2" style="vertical-align:bottom"></label></td>
+        </tr>
+        <tr>
+            <td>B</td>
+            <td>12 ECU</td>
+            <td>50%</td>
+        </tr>
+            <tr>
+            <th rowspan=2 class="text-center"><b>3</b></th>
+            <td>A</td>
+            <td>32 ECU</td>
+            <td>50%</td>
+            <td rowspan=2><label><input type="radio" name="gamble" value="3" style="vertical-align:bottom"></label></td>
+        </tr>
+        <tr>
+            <td>B</td>
+            <td>8 ECU</td>
+            <td>50%</td>
+        </tr>
+        <tr>
+            <th rowspan=2 class="text-center"><b>4</b></th>
+            <td>A</td>
+            <td>40 ECU</td>
+            <td>50%</td>
+            <td rowspan=2><label><input type="radio" name="gamble" value="4" style="vertical-align:bottom"></label></td>
+        </tr>
+        <tr>
+            <td>B</td>
+            <td>4 ECU</td>
+            <td>50%</td>
+        </tr>
+            <tr>
+            <th rowspan=2 class="text-center"><b>5</b></th>
+            <td>A</td>
+            <td>48 ECU</td>
+            <td>50%</td>
+            <td rowspan=2><label><input type="radio" name="gamble" value="5" style="vertical-align:bottom"></label></td>
+            </tr>
+        <tr>
+            <td>B</td>
+            <td>0 ECU</td>
+            <td>50%</td>
+        </tr>
+
+    </table>
+
+</div>
+        </div>
+
+</div>
+
+    <div><p></p></div>
+    {% next_button %}
+    {% endblock %}
