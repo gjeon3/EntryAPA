@@ -1,0 +1,39 @@
+{% extends "global/Page.html" %}
+{% load otree %}
+
+{% block title %}
+    Round {{ subsession.round_number }} of {{ Constants.num_rounds }}
+{% endblock %}
+
+{% block content %}
+
+    <h4>Instructions</h4>
+    <p>
+        This is a matching pennies game.
+        Player 1 is the 'Mismatcher' and wins if the choices mismatch;
+        Player 2 is the 'Matcher' and wins if they match.
+
+    </p>
+
+    <p>
+        At the end, a random round will be chosen for payment.
+    </p>
+
+    <p>
+
+    <h4>Round history</h4>
+    <table class="table">
+        <tr>
+            <th>Round</th>
+            <th>Player and outcome</th>
+        </tr>
+
+    </table>
+
+
+
+    {% formfields %}
+
+    {% next_button %}
+
+{% endblock %}

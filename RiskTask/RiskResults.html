@@ -1,0 +1,77 @@
+{% extends "global/Page.html" %}
+
+{% block title %}
+ Results
+{% endblock %}
+{% block content %}
+
+    <div>
+        <h5> Number of GARP violations:    {{ violate }} </h5>
+        <h5> Afriat efficiency index:    {{ index }} </h5>
+
+    </div>
+
+    <br>
+
+        <table  id="table_results" class="table table-bordered">
+            <thead>
+                <tr></tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+{% endblock %}
+
+{% block script %}
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqwidgets/12.0.2/jqwidgets/styles/jqx.base.min.css">
+    <script src ="https://cdnjs.cloudflare.com/ajax/libs/jqwidgets/12.0.2/jqwidgets/jqx-all.js"></script>
+    <script>
+
+    let numGoods = {{ numGoods }};
+    let nameGoods = {{ nameGoods }};
+    let priceGoods = {{ priceGoods }};
+    let budgets = {{ budgetGoods }};
+    let num_scenarios = {{ numScenarios }};
+    let rRaw = {{ response }};
+    let px = {{ px }};
+
+    //get response string and make it into list
+    console.log(rRaw)
+    const rlisty = rRaw.split(",")
+    console.log(rlisty)
+
+    //get price list and quantity list for each scenario
+    for (var k = 0; k < num_scenarios; k++){
+        var rlist = [];
+        var plist = [];
+        for (var i = 0; i < numGoods+1; i ++) {
+            let start = i * numGoods
+            rlist.push(rlisty.slice(start, start+numGoods))
+            plist.push(priceGoods.slice(start,start+numGoods))
+        }
+    }
+    console.log(plist)
+    console.log(rlist)
+
+    //create results matrix
+    resultHtml = "";
+    resultHtml += "<tr>  </tr>"
+    resultHtml += "<td> Results matrix {P·Q}  </td>"
+    for (var i = 0; i < num_scenarios; i++) {
+        resultHtml +=   "<td> Quantity chosen in Scenario " + (i + 1).toString() +": [" + rlist[i] + "]</td>"
+    }
+    for (var j = 0; j < num_scenarios; j++) {
+        resultHtml += "<tr>"
+        resultHtml +=   "<td> Price of Scenario " + (j + 1).toString() + ": [" + plist[j] + "]</td>"
+                for (var i = 0; i < num_scenarios; i++) {
+                    resultHtml += "<td>" + px[j][i] + "</td>"
+                }
+        resultHtml += "</tr>"
+    }
+    $('#table_results >tbody').append(resultHtml);
+
+    </script>
+
+{% endblock %}

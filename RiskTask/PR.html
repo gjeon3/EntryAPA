@@ -1,0 +1,40 @@
+{% extends "global/Page.html" %}
+
+{% block title %}
+ Belief about Population risk preference distribution
+{% endblock %}
+{% block content %}
+
+    <div>
+        <h6> Instructions: Choose one among A, B, C, D, and E. <br>
+        At the end of the experiment, ...etc. </h6>
+    </div>
+
+    <br>
+        <table  id="table_results" class="table table-bordered">
+            <thead>
+                <tr></tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+{% endblock %}
+
+{% block script %}
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqwidgets/12.0.2/jqwidgets/styles/jqx.base.min.css">
+    <script src ="https://cdnjs.cloudflare.com/ajax/libs/jqwidgets/12.0.2/jqwidgets/jqx-all.js"></script>
+    <script>
+
+    //create results matrix
+    resultHtml = "";
+    resultHtml += "<tr>"
+    resultHtml += "<tr>  </tr>"
+    resultHtml += "<td> Just put picture  </td>"
+
+    $('#table_results >tbody').append(resultHtml);
+
+    </script>
+
+{% endblock %}
