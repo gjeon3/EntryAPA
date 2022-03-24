@@ -1,0 +1,376 @@
+{% extends "global/Page.html" %}
+
+{% block title %}
+ Make purchase decisions
+{% endblock %}
+
+<style type="text/css">
+    .button_next {float: right}
+    .button_back {float: left}
+    .content {
+        display: flex;
+        justify-content: center}
+</style>
+
+
+{% block content %}
+
+    <!-- Tab navigation -->
+
+     <div id="goodsIntro">
+     <h6> You have {{ numGoods }} goods to choose from. Choose your quantity for each good and for all scenarios.</h6>
+
+        <table  id="table_goods" class="table table-bordered">
+            <thead>
+                <tr></tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+     </div>
+
+    <br>
+
+    <!-- Navigation tab -->
+       <div id="tabNav">
+        </div>
+
+    <!-- Tab content -->
+    <div class="tab-content content" id="myTabContent">
+    </div>
+
+    <!-- Navigation buttons -->
+    <div>
+    <button id="back" type="button" class="prevtab btn btn-success button_back">Back</button>
+    <button id="next" type="button" class="nexttab btn btn-success button_next">Next</button>
+    </div>
+
+    <br> <br> <br>
+    <div class="button_next">
+        <button id="submit" class="otree-btn-next btn btn-primary" disabled>Submit your decisions</button>
+    </div>
+
+
+ {% endblock %}
+
+{% block script %}
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqwidgets/12.0.2/jqwidgets/styles/jqx.base.min.css">
+    <script src ="https://cdnjs.cloudflare.com/ajax/libs/jqwidgets/12.0.2/jqwidgets/jqx-all.js"></script>
+    <script>
+
+    let descGoods = {{ descGoods }};
+    let numGoods = {{ numGoods }};
+    let nameGoods = {{ nameGoods }};
+    let priceGoods = {{ priceGoods }};
+    let num_scenarios = {{ numScenarios }};
+
+    //Create introduction table that lists good name and description
+     var intro =``;
+         intro +=  "<th> Good name </th>";
+         intro +=  "<th> Description </th>";
+     $('#table_goods >thead tr').append(intro);
+         intro =``;
+         for (var i = 0; i < numGoods; i++) {
+             intro+="<tr>"
+             intro+=   "<td>" + nameGoods[i]+ "</td>"
+             intro+=   "<td>" + descGoods[i]+ "</td>"
+             intro+="</tr>"
+         }
+    $('#table_goods >tbody:last-child').append(intro);
+
+    ///Make tabs
+    var tab ='';
+        tab +=`<class = "navbar-fixed-top">`
+        tab += `<ul class="nav nav-tabs" id="pills-tab" role="tablist">`
+        tab +=   `<li class="nav-item">
+        <a class="nav-link active" id="tab-scenario1-tab"  data-toggle="tab"  role="tab" aria-controls="tab-scenario1" aria-selected="true">
+        Scenario 1
+        </a>
+          </li>`
+        for (var j = 1; j < num_scenarios; j++) {
+        let jnn = j + 1
+        tab +=
+                `<li class="nav-item">
+            <a class="nav-link" id="tab-scenario${jnn}-tab"  data-toggle="tab"  role="tab" aria-controls="tab-scenario${jnn}" aria-selected="false">
+            Scenario ${jnn}
+            </a>
+              </li>`
+            }
+        tab += `</ul>`
+    document.getElementById("tabNav").innerHTML = tab
+
+
+    ///Make tab contents
+    var content='';
+    for (var k = 0; k < num_scenarios; k++) {
+        //create content for each scenario
+        let r = k + 1
+        let budgets = {{ budgetGoods }};
+        let budget = budgets[k]
+        if (k == 0) {
+            content += `<div class="tab-pane fade show active" id="tab-scenario${r}" role="tabpanel" aria-labelledby="tab-scenario${r}-tab">`;
+        }
+        else {
+            content += `<div class="tab-pane fade" id="tab-scenario${r}" role="tabpanel" aria-labelledby="tab-scenario${r}-tab">`;
+        }
+        {# add budget prompt #}
+        content += `<div id="budgetprompt_${r}">
+        <br><h5>Scenario ${r}: You have a total budget of $${budget} to spend.</h5>
+        </div>
+        {# add budget message to be shown based on inputs #}
+        <div id="budgetmessage_${r}">
+        </div>
+        {# add input table #}
+        <div id='jqxgrid_${r}'></div>
+        <br>
+        <input type="hidden" id="response_${r}" />
+        <input type="hidden" name="response" id="response" />
+        </div>
+        `
+        document.getElementById("myTabContent").innerHTML = content
+    } //content for loop for each scenario ends here
+
+    //Large loop over each scenario
+    for (var k = 0; k < num_scenarios; k++) {
+        let r = k + 1
+        let num_rows = {{ numGoods }};
+        let nameGoods = {{ nameGoods }};
+        let priceGoods = {{ priceGoods }};
+
+        //make price string into a list
+        let plisty = [];
+        for (let i = 0; i < priceGoods.length; i += num_rows)
+            plisty.push(priceGoods.slice(i, i + num_rows));
+        //get price list of scenario k
+        var plist = [].concat.apply([], plisty[k]);
+
+        console.log(priceGoods);
+        console.log(plisty);
+        console.log(plist);
+
+        //create response list
+        let response = new Array(num_rows);
+        for (var i = 0; i < num_rows; i++) {
+            response[i] = -999;
+        }
+
+        //prepare the data for the grid
+        var data = [];
+        var productNames = nameGoods
+        var priceValues = plist;
+        for (var i = 0; i < num_rows; i++) {
+            var row = {};
+            var price = plist[i];
+            var quantity = 0;
+            row["productname"] = nameGoods[i];
+            row["price"] = price;
+            row["quantity"] = quantity;
+            row["total"] = price * quantity;
+            data[i] = row;
+        };
+        //define data in the grid
+        var source =
+            {
+                localdata: data,
+                datatype: "array",
+                datafields:
+                    [
+                        {name: 'productname', type: 'string'},
+                        {name: 'quantity', type: 'number'},
+                        {name: 'price', type: 'number'},
+                        {name: 'total', type: 'number'}
+                    ]
+            };
+        var dataAdapter = new $.jqx.dataAdapter(source);
+
+        //actual grid is created here
+        $("#jqxgrid_" + r).jqxGrid(
+            {
+                width: 450,
+                source: dataAdapter,
+                columnsresize: true,
+                editable: true,
+                editmode: 'selectedcell',
+                showaggregates: true,
+                showstatusbar: true,
+                columns: [
+                    {text: 'Good', datafield: 'productname', width: 180, editable: false},
+                    {
+                        text: 'Quantity',
+                        datafield: 'quantity',
+                        width: 70,
+                        align: 'right',
+                        cellsalign: 'right',
+                        columntype: 'numberinput',
+                        //quantity in the grid is an input
+                        createeditor: function (row, cellvalue, editor) {
+                            editor.jqxNumberInput({decimalDigits: 0, digits: 3});
+                        },
+                        //when quantity changes, the total changes
+                        cellvaluechanging: function (row, datafield, columntype, oldvalue, newvalue) {
+                            var price = $("#jqxgrid_" + r).jqxGrid('getcellvalue', row, "price");
+                            $("#jqxgrid_" + r).jqxGrid('setcellvalue', row, "total", newvalue * price);
+                        }
+                    },
+                    {
+                        text: 'Unit Price',
+                        datafield: 'price',
+                        width: 90,
+                        editable: false,
+                        cellsalign: 'right',
+                        cellsformat: 'c2'
+                    },
+                    {
+                        text: 'Total',
+                        datafield: 'total',
+                        cellsalign: 'right',
+                        editable: false,
+                        cellsformat: 'c2',
+                        //aggregates total shown in the last row
+                        aggregates: [{
+                            'Total': function (aggregatedValue, currentValue) {
+                                return aggregatedValue + currentValue;
+                            }
+                        }],
+                    }]
+            });
+        } //grid creation ends here
+
+        //loop over scenarios and record all responses,
+        for (var k = 0; k < num_scenarios; k++) {
+
+            let r = k + 1
+            let num_rows = {{ numGoods }};
+            let budgets = {{ budgetGoods }};
+            let budget = budgets[k]
+
+            //function when cell value of quantity changes
+            $("#jqxgrid_" + r).on('cellvaluechanged', function (event) {
+
+                //get quantity values and record into response variable of that scenario
+                var values =[]
+                for (var i = 0; i < num_rows; i++) {
+                    values[i] = $("#jqxgrid_" + r).jqxGrid('getcellvalue', i, "quantity")
+                }
+                $("#response_" + r).val(values);
+                console.log($("#response_" + r).val())
+
+                //get responses from all scenarios and record into a single list
+                var rlist = []
+                for (var k = 0; k < num_scenarios; k++) {
+                    let r = k + 1
+                    item = $("#response_" + r).val()
+                    rlist.push(item)
+                }
+                console.log(rlist)
+
+                //take that list and make into a string format
+                let list = ""
+                for (var k = 0; k< num_scenarios; k ++) {
+                    if (k < num_scenarios -1) {
+                    list += rlist[k].split(",") + ","}
+                    else if (k = num_scenarios -1) {
+                      list += rlist[k].split(",")
+                    }
+                }
+                console.log(list)
+
+                //save that string response into the response variable
+                var responses = $("#response")
+                responses.val(JSON.stringify(list))
+                console.log(responses.val())
+
+            });
+
+            $("#jqxgrid_" + r).on('cellvaluechanged', function (event) {
+
+                //get total budget spent and show respective budget messages
+                var totals = $("#jqxgrid_"+r).jqxGrid('getcolumnaggregateddata', 'total', ['sum']);
+                var total = totals.sum
+                if (total > budget) {
+                    const errormsg = `<h5 style="color:#FF0000" > Your current total exceeds your budget of $${budget}.</h5>`
+                    document.getElementById("budgetmessage_" + r).innerHTML = errormsg
+                } else if (total < budget) {
+                    const errormsg = `<h5 style="color:#00008B" > Your current total is less than your budget of $ ${budget}.</h5>`
+                    document.getElementById("budgetmessage_" + r).innerHTML = errormsg
+                } else if (total = budget) {
+                    const errormsg = `<h5 > Your current total is equal to your budget of $${budget}.</h5>`
+                    document.getElementById("budgetmessage_" + r).innerHTML = errormsg
+                };
+
+                //make variables to check whether the response fulfills the binding budget
+                var addtotals = 0
+                var btotals = 0
+                for (var k = 0; k < num_scenarios; k++) {
+                    let r = k + 1
+                    let budgets = {{ budgetGoods }}
+                    addtotals = addtotals + parseFloat($("#jqxgrid_"+r).jqxGrid('getcolumnaggregateddata', 'total', ['sum']).sum)
+                    btotals = btotals + parseFloat(budgets[k])
+                }
+                console.log(addtotals)
+                console.log(btotals)
+
+                //show submit button only if total budget spent equals total budget given
+                if (addtotals != btotals) {
+                    $('#submit').prop('disabled', true);
+                } else {
+                    $('#submit').prop('disabled', false);
+                }
+                })
+    }//the big for loop across scenarios ends here
+
+
+    //navigation tab active control set up
+    $(".nav .nav-link").on("click", function(){
+        $(".nav").find(".active").removeClass("active");
+        $("[aria-selected*=true]").attr("aria-selected",false)
+        $(this).addClass("active");
+        $(this).attr("aria-selected",true);
+        console.log($(this).attr("aria-controls"))
+        let k = "#"+$(this).attr("aria-controls")
+        console.log(k)
+        $(".tab-content").find(".active").removeClass("active show");
+        $(k).addClass("active show")
+    });
+
+    //set up next and back buttons that control navigation tab
+    function bootstrapTabControl() {
+        var i, items = $('.nav-link'), pane = $('.tab-pane');
+        //next button
+        $('.nexttab').on('click', function () {
+            for (i = 0; i < items.length; i++) {
+                if ($(items[i]).hasClass('active') == true) {
+                    break;
+                }
+            }
+            if (i < items.length - 1) {
+                // for tab
+                $(items[i]).removeClass('active');
+                $(items[i + 1]).addClass('active');
+                // for pane
+                $(pane[i]).removeClass('show active');
+                $(pane[i + 1]).addClass('show active');
+            }
+        });
+        //back button
+        $('.prevtab').on('click', function () {
+            for (i = 0; i < items.length; i++) {
+                if ($(items[i]).hasClass('active') == true) {
+                    break;
+                }
+            }
+            if (i != 0) {
+                // for tab
+                $(items[i]).removeClass('active');
+                $(items[i - 1]).addClass('active');
+                // for pane
+                $(pane[i]).removeClass('show active');
+                $(pane[i - 1]).addClass('show active');
+            }
+        });
+    }
+    //call on the tab control
+    bootstrapTabControl();
+
+    </script>
+{% endblock %}
