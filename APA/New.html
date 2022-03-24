@@ -1,0 +1,124 @@
+{% extends "global/Page.html" %}
+{%  load otree static %}
+
+{% block content %}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+
+
+<div class="w3-sidebar w3-bar-block w3-light-grey w3-card" style="width:150px">
+  <h4 style="background-color:lightgrey;" class="w3-bar-item">Games</h4>
+    <button type="button" class="w3-bar-item w3-button tablink" onclick="openGame(event, 'G0')">Instructions</button>
+  <button type="button" class="w3-bar-item w3-button tablink" onclick="openGame(event, 'G1')">G-I</button>
+  <button type="button" class="w3-bar-item w3-button tablink" onclick="openGame(event, 'G2')">G-II</button>
+  <button type="button" class="w3-bar-item w3-button tablink" onclick="openGame(event, 'G3')">G-III</button>
+  <button type="button" class="w3-bar-item w3-button tablink" onclick="openGame(event, 'G4')">G-IV</button>
+  <button type="button" class="w3-bar-item w3-button tablink" onclick="openGame(event, 'G5')">G-V</button>
+
+
+  <h4 style="background-color:lightgrey;" class="w3-bar-item">Risks</h4>
+    <button type="button" class="w3-bar-item w3-button tablink2" onclick="openRisk(event, 'R0')">Instructions</button>
+  <button type="button" class="w3-bar-item w3-button tablink2" onclick="openRisk(event, 'R1')">R-I</button>
+  <button type="button" class="w3-bar-item w3-button tablink2" onclick="openRisk(event, 'R2')">R-II</button>
+  <button type="button" class="w3-bar-item w3-button tablink2" onclick="openRisk(event, 'R3')">R-III</button>
+  <button type="button" class="w3-bar-item w3-button tablink2" onclick="openRisk(event, 'R4')">R-IV</button>
+  <button type="button" class="w3-bar-item w3-button tablink2" onclick="openRisk(event, 'R5')">R-V</button>
+</div>
+
+<div style='margin-left:150px'>
+  <div id="G0" class="w3-container game" style="display:block">
+    <h2>Game Instructions</h2>
+      <img src="{% static 'images/G0.png'%}" width="500px" />
+      <img src="{% static 'images/G0.png'%}" width="500px" />
+  </div>
+
+  <div id="G1" class="w3-container game" style="display:none">
+    <h2>Game I: Nothing to decide</h2>
+      <img src="{% static 'images/G1.png'%}" width="400px" />
+  </div>
+
+  <div id="G2" class="w3-container game" style="display:none">
+    <h2>Game II: Decide entry</h2>
+      <img src="{% static 'images/G2.png'%}" width="400px" />  </div>
+
+  <div id="G3" class="w3-container game" style="display:none">
+    <h2>Game III: Bid against opponent</h2>
+      {{ form.bid3 }}
+    <img src="{% static 'images/G3.png'%}" width="400px" />  </div>
+
+  <div id="G4" class="w3-container game" style="display:none">
+    <h2>Game IV: Decide to enter and bid against someone's bid in GIII</h2>
+    <img src="{% static 'images/G4.png'%}" width="400px" />  </div>
+
+  <div id="G5" class="w3-container game" style="display:none">
+    <h2>Game V: Decide to enter and bid against someone who also chosen to enter here</h2>
+    <img src="{% static 'images/G5.png'%}" width="400px" />  </div>
+</div>
+
+<div style='margin-left:150px'>
+    <div id="R0" class="w3-container risk" style="display:block">
+    <h2>Risk Instructions</h2>
+      <img src="{% static 'images/R0.png'%}" width="500px" />  </div>
+
+  <div id="R1" class="w3-container risk" style="display:none">
+    <h2>Risk I: Own risk</h2>
+      <img src="{% static 'images/R1.png'%}" width="500px" />  </div>
+
+
+  <div id="R2" class="w3-container risk" style="display:none">
+    <h2>Risk II: Belief about Game II opponent's risk </h2>
+      <img src="{% static 'images/R2.png'%}" width="500px" />  </div>
+
+  <div id="R3" class="w3-container risk" style="display:none">
+    <h2>Risk III: Belief about Game III opponent's risk</h2>
+      <img src="{% static 'images/R2.png'%}" width="500px" />  </div>
+
+
+  <div id="R4" class="w3-container risk" style="display:none">
+    <h2>Risk IV: Belief about Game IV opponent's risk</h2>
+      <img src="{% static 'images/R2.png'%}" width="500px" />  </div>
+
+
+  <div id="R5" class="w3-container risk" style="display:none">
+    <h2>Risk V: Belief about Game V opponent's risk</h2>
+      <img src="{% static 'images/R2.png'%}" width="500px" />  </div>
+
+
+</div>
+ {{ form.errors }}
+
+    {% endblock %}
+
+{% block script %}
+<script>
+function openGame(evt, gameNum) {
+  var i, x, tablinks;
+  x = document.getElementsByClassName("game");
+  for (i = 0; i < x.length; i++) {
+    x[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablink");
+  for (i = 0; i < x.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" w3-red", "");
+  }
+  document.getElementById(gameNum).style.display = "block";
+  evt.currentTarget.className += " w3-red";
+}
+
+function openRisk(evt, riskNum) {
+  var i, x, tablinks2;
+  x = document.getElementsByClassName("risk");
+  for (i = 0; i < x.length; i++) {
+    x[i].style.display = "none";
+  }
+  tablinks2 = document.getElementsByClassName("tablink2");
+  for (i = 0; i < x.length; i++) {
+    tablinks2[i].className = tablinks2[i].className.replace(" w3-red", "");
+  }
+  document.getElementById(riskNum).style.display = "block";
+  evt.currentTarget.className += " w3-red";
+}
+</script>
+
+{% endblock %}

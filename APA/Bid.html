@@ -1,64 +1,228 @@
 {% extends "global/Page.html" %}
 {% load otree %}
 
+
 {% block title %}
     Round {{ subsession.round_number }} of {{ Constants.num_rounds }}
 {% endblock %}
 
 {% block content %}
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <div class="row">
+        <div class="col-12 justify-content-center">
+            {{ player.bid3 }}
+        </div>
+    </div>
 
-<h3>NAV try up</h3>
-<div class="w3-sidebar w3-bar-block w3-light-grey w3-card" style="width:130px">
-  <h5 class="w3-bar-item">Menu</h5>
-  <button class="w3-bar-item w3-button tablink" onclick="openCity(event, 'London')">London</button>
-  <button class="w3-bar-item w3-button tablink" onclick="openCity(event, 'Paris')">Paris</button>
-  <button class="w3-bar-item w3-button tablink" onclick="openCity(event, 'Tokyo')">Tokyo</button>
-</div>
+    <div class = "row">
+        <div class = "col-12">
+            <div id="chart_container"></div>
+        </div>
+    </div>
 
-    <div style="margin-left:130px">
-  <div class="w3-padding">Vertical Tab Example (sidebar)</div>
+    <div class="row bins" id="tokens_div"></div>
+    <br>
+    <div class="row bins" id="input_div">
+           </div>
+    <br>
 
+    <input type="hidden" name="response" id="response" />
+    <div class="row">
+    *tokens
+        <div class="col-4" style="text-align: left">
+            <span id="unallocated_tokens"></span>
+        </div>
 
-    <h4>Instructions</h4>
-    <p>
-        This is a matching pennies game.
-        Player 1 is the 'Mismatcher' and wins if the choices mismatch;
-        Player 2 is the 'Matcher' and wins if they match.
-
-    </p>
-
-    <p>
-        At the end, a random round will be chosen for payment.
-    </p>
-
-    <p>
-
-    <h4>Round history</h4>
-    <table class="table">
-        <tr>
-            <th>Round</th>
-            <th>Player and outcome</th>
-        </tr>
-
-    </table>
+    *submit
+        <div class="col-4" style="text-align: center">
+            <button id="submit" class="otree-btn-next btn btn-primary" disabled><span id="submit_text"></span></button>
+        </div>
+    *directions
+        <div class="col-4" style="text-align: right">
+            <span id="directions">t</span>
+        </div>
+    </div>
+{% endblock %}
 
 
+{% block script %}
+    <script src="{% static 'highcharts.js' %}"></script>
+<script>
+    let color = {{ player.color }};
+    console.log('color: ' + color[0]);
+    console.log({{ player.bin_labels }});
+    let bid3 = {{ player.bid3 }};
+    let num_bins = 1;
+    let response = new Array(num_bins);
 
-    {% formfields %}
+    let response_proxy = new Proxy(response,
+    {
+        get: function (target, prop) {
+            return target[prop];
+        },
+        set: function (target, prop, value) {
+            target[prop] = value;
+            const sum = target.reduce((partialSum, a) => partialSum + a, 0);
+            unallocated_tokens = num_tokens - sum;
+            response_changed();
+            return true;
+        }
+    });
+        let scores = new Array(num_bins);
+        let i;
+        for (i=0; i < num_bins; i++)
+        {
+           response[i] = 0;
+           scores[i] = 0;
+        }
 
-    {% next_button %}
-</div>
+        let num_tokens = {{ Constants.endowment }};
+        // let allocated_tokens = 0;
+        let unallocated_tokens = num_tokens;
+        let alpha = {{ player.alpha }};
+        let beta = {{ player.beta }};
+
+    let my_chart;
+
+        currency_a = '$';
+        currency_b = '';
+        or = 'OR';
+        submit = 'Submit';
+        unallocated_text = 'Unallocated tokens: ';
+        submit_text = 'Submit your decision or continue making choices';
+        tokens = 'tokens';
+
+            function scoring_rule(index) {
+            //console.log('in scoring rule')
+            let ss = 0;
+            let b;
+            for (b = 0; b < num_bins; b++) {
+                // division of two integers results in integer (with possible rounding), so multiply by 1.0 to convert to float
+                ss = ss + Math.pow(response[b] / num_tokens, 2); // forces result to be float
+            }
+            return alpha + beta * ((2 * response[index] / num_tokens) - ss);
+        };
+
+       function response_changed() {
+            console.log('in response_changed function');
+                // update chart
+                let i
+                for (i = 0; i < num_bins; i++) {
+                    scores[i] = scoring_rule(i);
+                }
+                my_chart.series[0].setData(scores);
+
+            // update remaining tokens
+            $('#unallocated_tokens').text(unallocated_text + unallocated_tokens.toString());
+
+            // update hidden form field
+             $("#response").val(JSON.stringify(response));
+
+            // enable submit button if all tokens allocated
+            if (unallocated_tokens==0) {
+                $('#submit').prop('disabled', false);
+                $('#directions').text(submit_text)
+            } else {
+                $('#submit').prop('disabled', true);
+                $('#directions').text(allocate_all)
+            }
+        };
+
+       document.addEventListener( 'DOMContentLoaded', function() {
+
+           $('#submit_text').text(submit);
+
+           my_chart = Highcharts.chart('chart_container', {
+               title: {
+                   text: "",
+               },
+               chart: {
+                   type: "column",
+                   animation: false,
+                   marginTop: 40,  // Extra space so that bar labels are not cropped when always on top of bar.
+               },
+               // colors: ['#faa71b'],
+               colors: [getComputedStyle(document.documentElement, null).getPropertyValue(color[0])],
+               plotOptions: {
+                   series: {
+                       animation: false,
+                   },
+                   column: {
+                       maxPointWidth: 100,  // max width of column
+                       dataLabels: {
+                           enabled: true,
+                           inside: false,
+                           crop: false,
+                           overflow: 'none',
+                           style: {
+                               fontSize: "14px",
+                               fontWeight: "normal",
+                               textShadow: "0px",
+                               textOutline: "none",
+                           },
+                       },
+                   },
+               },
+               xAxis: {
+                   tickLength: 0,
+                   labels: {
+                       style: {
+                           fontSize: "14px",
+                           fontWeight: "normal",
+                           textShadow: "0px",
+                           textOutline: "none",
+                       },
+                       formatter: function () {
+                           return bin_labels[this.value]
+                       }
+                   }
+               },
+               yAxis: {
+                   title: {
+                       text: '' // axis label
+                   },
+                   min: alpha - beta,
+                   max: alpha + beta,
+                   tickPositions: [alpha - beta, alpha - beta / 2, alpha, alpha + beta / 2, alpha + beta],
+                   labels: {},
+                   gridLineWidth: 0,
+                   lineWidth: 1,
+                   tickWidth: 1,
+               },
+               series: [{
+                   data: bid3,
+
+               }],
+               credits: {
+                   enabled: false,
+               },
+               legend: {
+                   enabled: false,
+               },
+           });
 
 
+           function sliderRowMargins() {
+               let leftInt = -30
+               let rightInt = 0
+
+               leftInt = my_chart.xAxis[0].toPixels(-0.5, false) - my_chart.container.clientLeft
+               rightInt = my_chart.container.clientWidth - my_chart.xAxis[0].toPixels(num_bins - 0.5, false)
+
+               return {
+                   'margin-left': (leftInt) + 'px',
+                   'margin-right': (rightInt) + 'px',
+               }
+           }
+       });
 
 
-
-
-
-
+</script>
 
 
 {% endblock %}
+
+
+
+
+
